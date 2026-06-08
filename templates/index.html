@@ -1,0 +1,707 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>招生智能体系统</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #2563eb;
+            --primary-light: #3b82f6;
+            --primary-bg: #eff6ff;
+            --success: #16a34a;
+            --warning: #d97706;
+            --danger: #dc2626;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            --radius: 8px;
+            --shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1);
+        }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--gray-50); color: var(--gray-800); }
+        .app { display: flex; min-height: 100vh; }
+        
+        /* Sidebar */
+        .sidebar { width: 220px; background: var(--gray-900); color: white; padding: 20px 0; flex-shrink: 0; }
+        .sidebar-logo { padding: 0 20px 24px; border-bottom: 1px solid var(--gray-700); margin-bottom: 8px; }
+        .sidebar-logo h1 { font-size: 18px; font-weight: 700; }
+        .sidebar-logo p { font-size: 11px; color: var(--gray-400); margin-top: 2px; }
+        .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 20px; cursor: pointer; color: var(--gray-300); text-decoration: none; font-size: 14px; transition: all 0.15s; }
+        .nav-item:hover { background: var(--gray-800); color: white; }
+        .nav-item.active { background: var(--primary); color: white; }
+        .nav-icon { font-size: 18px; width: 22px; text-align: center; }
+        
+        /* Main */
+        .main { flex: 1; overflow-y: auto; }
+        .topbar { padding: 16px 32px; background: white; border-bottom: 1px solid var(--gray-200); display: flex; justify-content: space-between; align-items: center; }
+        .topbar h2 { font-size: 18px; font-weight: 600; }
+        .topbar-time { font-size: 13px; color: var(--gray-500); }
+        .content { padding: 24px 32px; }
+
+        /* Stats cards */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; margin-bottom: 24px; }
+        .stat-card { background: white; border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow); }
+        .stat-label { font-size: 12px; color: var(--gray-500); margin-bottom: 4px; }
+        .stat-value { font-size: 24px; font-weight: 700; }
+        .stat-sub { font-size: 12px; color: var(--gray-400); margin-top: 2px; }
+        .stat-card.green .stat-value { color: var(--success); }
+        .stat-card.red .stat-value { color: var(--danger); }
+        .stat-card.blue .stat-value { color: var(--primary); }
+        .stat-card.amber .stat-value { color: var(--warning); }
+
+        .section-title { font-size: 15px; font-weight: 600; margin-bottom: 12px; color: var(--gray-700); }
+
+        /* Lead table */
+        .table-wrap { background: white; border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th { text-align: left; padding: 10px 12px; background: var(--gray-50); color: var(--gray-600); font-weight: 600; border-bottom: 1px solid var(--gray-200); font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
+        td { padding: 10px 12px; border-bottom: 1px solid var(--gray-100); }
+        tr:hover td { background: var(--primary-bg); }
+        tr:last-child td { border-bottom: none; }
+
+        .badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 500; }
+        .badge-green { background: #dcfce7; color: #166534; }
+        .badge-blue { background: #dbeafe; color: #1e40af; }
+        .badge-amber { background: #fef3c7; color: #92400e; }
+        .badge-red { background: #fee2e2; color: #991b1b; }
+        .badge-gray { background: var(--gray-100); color: var(--gray-600); }
+        .badge-purple { background: #f3e8ff; color: #6b21a8; }
+        .badge-pink { background: #fce7f3; color: #9d174d; }
+
+        .level-A { color: var(--success); font-weight: 700; }
+        .level-B { color: var(--primary); font-weight: 700; }
+        .level-C { color: var(--warning); font-weight: 700; }
+        .level-D { color: var(--gray-400); font-weight: 700; }
+
+        /* Insight cards */
+        .insight-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; margin-bottom: 24px; }
+        .insight-card { background: white; border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow); border-left: 4px solid var(--primary); }
+        .insight-card.warning { border-left-color: var(--warning); }
+        .insight-card.success { border-left-color: var(--success); }
+        .insight-card.opportunity { border-left-color: #8b5cf6; }
+        .insight-title { font-size: 13px; color: var(--gray-500); }
+        .insight-value { font-size: 18px; font-weight: 700; margin: 4px 0; }
+        .insight-detail { font-size: 12px; color: var(--gray-500); }
+
+        .suggestion-box { background: var(--primary-bg); border: 1px solid #bfdbfe; border-radius: var(--radius); padding: 16px; margin-bottom: 24px; }
+        .suggestion-box h3 { font-size: 14px; color: var(--primary); margin-bottom: 8px; }
+        .suggestion-item { padding: 6px 0; font-size: 13px; color: var(--gray-700); }
+
+        .filter-bar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+        .filter-btn { padding: 6px 14px; border: 1px solid var(--gray-200); border-radius: 20px; background: white; cursor: pointer; font-size: 13px; color: var(--gray-600); transition: all 0.15s; }
+        .filter-btn:hover { border-color: var(--primary); color: var(--primary); }
+        .filter-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+        .search-box { padding: 8px 12px; border: 1px solid var(--gray-200); border-radius: var(--radius); font-size: 13px; width: 220px; }
+
+        .clickable { cursor: pointer; }
+
+        /* Modal */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 100; align-items: center; justify-content: center; }
+        .modal-overlay.show { display: flex; }
+        .modal { background: white; border-radius: 12px; width: 90%; max-width: 700px; max-height: 85vh; overflow-y: auto; box-shadow: var(--shadow-lg); }
+        .modal-header { padding: 20px 24px; border-bottom: 1px solid var(--gray-200); display: flex; justify-content: space-between; align-items: center; }
+        .modal-header h3 { font-size: 16px; }
+        .modal-close { width: 28px; height: 28px; border: none; background: var(--gray-100); border-radius: 50%; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; color: var(--gray-500); }
+        .modal-body { padding: 20px 24px; }
+        .modal-section { margin-bottom: 16px; }
+        .modal-section:last-child { margin-bottom: 0; }
+        .modal-section h4 { font-size: 13px; color: var(--gray-500); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+        .modal-section p, .modal-section .info-row { font-size: 14px; }
+        .info-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .info-row .label { color: var(--gray-500); font-size: 12px; }
+        .info-row .value { font-weight: 500; }
+
+        .script-box { background: var(--gray-50); border: 1px solid var(--gray-200); border-radius: var(--radius); padding: 14px; white-space: pre-wrap; font-size: 13px; line-height: 1.6; font-family: inherit; }
+        .tips-list { list-style: none; padding: 0; }
+        .tips-list li { padding: 4px 0; font-size: 13px; color: var(--gray-600); }
+        .tips-list li::before { content: "💡 "; }
+
+        .pain-tag { display: inline-block; padding: 2px 8px; border-radius: 4px; background: var(--gray-100); font-size: 11px; margin: 2px; color: var(--gray-600); }
+
+        .no-data { text-align: center; padding: 40px; color: var(--gray-400); font-size: 14px; }
+
+        .loading { text-align: center; padding: 40px; color: var(--gray-400); }
+        .loading::after { content: "..."; animation: dots 1.5s steps(4, end) infinite; }
+        @keyframes dots { 0%, 20% { content: ""; } 40% { content: "."; } 60% { content: ".."; } 80%, 100% { content: "..."; } }
+
+        @media (max-width: 768px) {
+            .sidebar { width: 60px; }
+            .sidebar-logo h1, .sidebar-logo p, .nav-text { display: none; }
+            .nav-item { justify-content: center; padding: 12px; }
+            .content { padding: 16px; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .info-grid { grid-template-columns: 1fr; }
+            .topbar { padding: 12px 16px; }
+        }
+    </style>
+</head>
+<body>
+<div class="app">
+    <div class="sidebar">
+        <div class="sidebar-logo">
+            <h1>🎓 招生智能体</h1>
+            <p>Agent Workflow System</p>
+        </div>
+        <a class="nav-item active" href="/" onclick="navigate(event, '/')">
+            <span class="nav-icon">📊</span><span class="nav-text">总览看板</span>
+        </a>
+        <a class="nav-item" href="/leads" onclick="navigate(event, '/leads')">
+            <span class="nav-icon">👥</span><span class="nav-text">线索管理</span>
+        </a>
+        <a class="nav-item" href="/workflow" onclick="navigate(event, '/workflow')">
+            <span class="nav-icon">🔄</span><span class="nav-text">跟进工作流</span>
+        </a>
+        <a class="nav-item" href="/report" onclick="navigate(event, '/report')">
+            <span class="nav-icon">📋</span><span class="nav-text">报告</span>
+        </a>
+        <a class="nav-item" href="/analysis" onclick="navigate(event, '/analysis')">
+            <span class="nav-icon">📈</span><span class="nav-text">数据分析</span>
+        </a>
+    </div>
+    <div class="main" id="main-content">
+        <div class="loading">加载中</div>
+    </div>
+</div>
+
+<script>
+function navigate(e, url) {
+    if (e) e.preventDefault();
+    history.pushState({}, '', url);
+    loadPage();
+}
+
+async function loadPage() {
+    const path = location.pathname;
+    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+    const navMap = { '/': 0, '/leads': 1, '/workflow': 2, '/report': 3, '/analysis': 4 };
+    const idx = navMap[path];
+    if (idx !== undefined) document.querySelectorAll('.nav-item')[idx]?.classList.add('active');
+
+    const container = document.getElementById('main-content');
+    container.innerHTML = '<div class="loading">加载中</div>';
+
+    if (path === '/') await renderDashboard(container);
+    else if (path === '/leads') await renderLeads(container);
+    else if (path === '/workflow') await renderWorkflow(container);
+    else if (path === '/report') await renderReport(container);
+    else if (path === '/analysis') await renderAnalysis(container);
+}
+
+async function renderDashboard(container) {
+    const [statsRes, leadsRes] = await Promise.all([
+        fetch('/api/stats').then(r => r.json()),
+        fetch('/api/leads').then(r => r.json())
+    ]);
+    const { stats, course_dist, insights, suggestions } = statsRes;
+    const topLeads = leadsRes.sort((a,b) => b.总分 - a.总分).slice(0, 8);
+
+    const levelCounts = {A:0, B:0, C:0, D:0};
+    leadsRes.forEach(l => { if (levelCounts[l.等级] !== undefined) levelCounts[l.等级]++; });
+
+    const conversion = stats.total_leads > 0 ? ((stats.enrolled / stats.total_leads) * 100).toFixed(1) : 0;
+    const silentRate = stats.total_leads > 0 ? ((stats.silent / stats.total_leads) * 100).toFixed(1) : 0;
+    const interestedTotal = stats.interested + stats.considering;
+
+    container.innerHTML = `
+        <div class="topbar">
+            <h2>📊 招生总览看板</h2>
+            <span class="topbar-time">${new Date().toLocaleDateString('zh-CN')}</span>
+        </div>
+        <div class="content">
+            <div class="stats-grid">
+                <div class="stat-card blue">
+                    <div class="stat-label">总线索数</div>
+                    <div class="stat-value">${stats.total_leads}</div>
+                    <div class="stat-sub">累计咨询客户</div>
+                </div>
+                <div class="stat-card green">
+                    <div class="stat-label">已报名</div>
+                    <div class="stat-value">${stats.enrolled}</div>
+                    <div class="stat-sub">转化率 ${conversion}%</div>
+                </div>
+                <div class="stat-card amber">
+                    <div class="stat-label">跟进中</div>
+                    <div class="stat-value">${interestedTotal}</div>
+                    <div class="stat-sub">有意向+考虑中</div>
+                </div>
+                <div class="stat-card" style="border-left: 3px solid #8b5cf6;">
+                    <div class="stat-label">A级线索</div>
+                    <div class="stat-value" style="color:#16a34a;">${levelCounts.A}</div>
+                    <div class="stat-sub">高意向优先跟进</div>
+                </div>
+                <div class="stat-card red">
+                    <div class="stat-label">静默失联</div>
+                    <div class="stat-value">${stats.silent}</div>
+                    <div class="stat-sub">占比 ${silentRate}%</div>
+                </div>
+                <div class="stat-card" style="border-left: 3px solid #f59e0b;">
+                    <div class="stat-label">爽约未到</div>
+                    <div class="stat-value">${stats.no_show}</div>
+                    <div class="stat-sub">需重新邀约</div>
+                </div>
+            </div>
+
+            <div class="suggestion-box">
+                <h3>🤖 智能体建议</h3>
+                ${suggestions.length > 0 ? suggestions.map(s => `<div class="suggestion-item">${s}</div>`).join('') : '<div class="suggestion-item">系统运行正常，暂无特别建议</div>'}
+            </div>
+
+            <div class="section-title">📌 关键洞察</div>
+            <div class="insight-grid">
+                ${insights.map(ins => `
+                    <div class="insight-card ${ins.type}">
+                        <div class="insight-title">${ins.title}</div>
+                        <div class="insight-value">${ins.value}</div>
+                        <div class="insight-detail">${ins.detail}</div>
+                    </div>
+                `).join('')}
+            </div>
+
+            <div class="section-title">⭐ 高意向线索（Top ${topLeads.length}）</div>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>姓名</th><th>咨询专业</th><th>等级</th><th>分数</th><th>跟进状态</th><th>痛点</th></tr></thead>
+                    <tbody>
+                        ${topLeads.map(l => `
+                            <tr class="clickable" onclick="openLeadDetail(${l.id})">
+                                <td><strong>${l.姓名}</strong></td>
+                                <td>${l.咨询专业}</td>
+                                <td><span class="level-${l.等级}">${l.等级}</span></td>
+                                <td>${l.总分}</td>
+                                <td>${statusBadge(l.跟进状态)}</td>
+                                <td>${(l.痛点||[]).map(p => `<span class="pain-tag">${p}</span>`).join('')}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    `;
+}
+
+async function renderLeads(container) {
+    const [leads, statuses] = await Promise.all([
+        fetch('/api/leads').then(r => r.json()),
+        fetch('/api/statuses').then(r => r.json())
+    ]);
+
+    const levels = ['全部', 'A', 'B', 'C', 'D'];
+    const allStatuses = [{id:'all',label:'全部状态'}, ...statuses];
+
+    container.innerHTML = `
+        <div class="topbar">
+            <h2>👥 线索管理</h2>
+            <input class="search-box" id="searchInput" placeholder="搜索姓名/电话/课程..." oninput="filterLeads()">
+        </div>
+        <div class="content">
+            <div class="filter-bar" id="levelFilters">
+                ${levels.map(l => `<button class="filter-btn ${l === '全部' ? 'active' : ''}" onclick="setLevelFilter('${l}')">${l === '全部' ? '全部等级' : l+'级'}</button>`).join('')}
+            </div>
+            <div class="filter-bar" id="statusFilters">
+                ${allStatuses.map(s => `<button class="filter-btn ${s.id === 'all' ? 'active' : ''}" onclick="setStatusFilter('${s.id}')">${s.label}</button>`).join('')}
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>姓名</th><th>电话</th><th>咨询专业</th><th>等级</th><th>分数</th><th>状态</th><th>痛点</th></tr></thead>
+                    <tbody id="leads-tbody">
+                        ${leads.map(l => `
+                            <tr class="clickable" onclick="openLeadDetail(${l.id})" data-name="${l.姓名}" data-phone="${l.联系电话}" data-course="${l.咨询专业}" data-level="${l.等级}" data-status="${l.跟进状态}">
+                                <td><strong>${l.姓名}</strong></td>
+                                <td>${l.联系电话}</td>
+                                <td>${l.咨询专业}</td>
+                                <td><span class="level-${l.等级}">${l.等级}</span></td>
+                                <td>${l.总分}</td>
+                                <td>${statusBadge(l.跟进状态)}</td>
+                                <td>${(l.痛点||[]).slice(0,2).map(p => `<span class="pain-tag">${p}</span>`).join('')}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+            <div style="margin-top:12px; font-size:12px; color: var(--gray-400);">点击任意行可查看详细信息和跟进策略</div>
+        </div>
+    `;
+    window._leads = leads;
+}
+
+let _levelFilter = '全部';
+let _statusFilter = 'all';
+window.setLevelFilter = function(l) {
+    _levelFilter = l;
+    document.querySelectorAll('#levelFilters .filter-btn').forEach(b => b.classList.toggle('active', b.textContent.includes(l)));
+    filterLeads();
+};
+window.setStatusFilter = function(s) {
+    _statusFilter = s;
+    document.querySelectorAll('#statusFilters .filter-btn').forEach(b => b.classList.toggle('active', b.dataset.sid === s || (b.dataset.sid === undefined && s === 'all')));
+    filterLeads();
+};
+window.filterLeads = function() {
+    const q = (document.getElementById('searchInput')?.value || '').toLowerCase();
+    const rows = document.querySelectorAll('#leads-tbody tr');
+    rows.forEach(row => {
+        const name = row.dataset.name.toLowerCase();
+        const phone = row.dataset.phone;
+        const course = row.dataset.course.toLowerCase();
+        const level = row.dataset.level;
+        const status = row.dataset.status;
+        const matchSearch = !q || name.includes(q) || phone.includes(q) || course.includes(q);
+        const matchLevel = _levelFilter === '全部' || level === _levelFilter;
+        const matchStatus = _statusFilter === 'all' || status === _statusFilter;
+        row.style.display = (matchSearch && matchLevel && matchStatus) ? '' : 'none';
+    });
+};
+
+let _currentLeadId = null;
+
+async function openLeadDetail(id) {
+    _currentLeadId = id;
+    const res = await fetch(`/api/lead/${id}`);
+    const lead = await res.json();
+    const strat = lead.跟进策略 || {};
+
+    document.getElementById('detail-modal').classList.add('show');
+    document.getElementById('detail-body').innerHTML = `
+        <div class="modal-section">
+            <h4>基本信息</h4>
+            <div class="info-grid">
+                <div class="info-row"><div class="label">姓名</div><div class="value">${lead.姓名}</div></div>
+                <div class="info-row"><div class="label">电话</div><div class="value">${lead.联系电话}</div></div>
+                <div class="info-row"><div class="label">咨询专业</div><div class="value">${lead.咨询专业}</div></div>
+                <div class="info-row"><div class="label">咨询日期</div><div class="value">${lead.咨询日期}</div></div>
+                <div class="info-row"><div class="label">学习地点</div><div class="value">${lead.学习地点 || '未说明'}</div></div>
+                <div class="info-row"><div class="label">预算</div><div class="value">${lead.预算 || '未说明'}</div></div>
+            </div>
+        </div>
+        <div class="modal-section">
+            <h4>AI评分</h4>
+            <div><span class="level-${lead.等级}" style="font-size:28px;font-weight:700;">${lead.等级}</span>
+            <span style="margin-left:10px;font-size:14px;color:var(--gray-500);">${lead.总分}分 - ${lead.等级说明}</span></div>
+            <div style="margin-top:8px;">
+                ${(lead.评分明细||[]).map(d => `
+                    <span style="display:inline-block;padding:4px 10px;background:var(--gray-100);border-radius:4px;margin:2px;font-size:12px;">
+                        ${d[0]}: ${d[1]}/${d[2]}
+                    </span>
+                `).join('')}
+            </div>
+        </div>
+        <div class="modal-section">
+            <h4>跟进状态</h4>
+            <div>${statusBadge(lead.跟进状态)}</div>
+            <div style="margin-top:6px;">
+                ${(lead.痛点||[]).map(p => `<span class="pain-tag">${p}</span>`).join('')}
+            </div>
+        </div>
+        <div class="modal-section">
+            <h4>📞 智能跟进策略</h4>
+            <div style="margin-bottom:6px;">
+                <span class="badge badge-blue">${strat.跟进标题||''}</span>
+                <span class="badge badge-amber">${strat.最佳时机||''}</span>
+                <span class="badge badge-purple">${strat.推荐渠道||''}</span>
+            </div>
+            <div class="script-box">${strat.话术模板 || '暂无推荐话术'}</div>
+            ${(strat.注意事项||[]).length > 0 ? `
+                <div style="margin-top:8px;">
+                    <strong style="font-size:12px;color:var(--gray-500);">注意事项：</strong>
+                    <ul class="tips-list">${strat.注意事项.map(t => `<li>${t}</li>`).join('')}</ul>
+                </div>
+            ` : ''}
+        </div>
+        <div class="modal-section">
+            <h4>原始回访记录</h4>
+            <div style="font-size:13px;color:var(--gray-600);background:var(--gray-50);padding:10px;border-radius:6px;">
+                ${lead.回访记录 || '无记录'}
+            </div>
+        </div>
+    `;
+}
+
+function closeModal() {
+    document.getElementById('detail-modal').classList.remove('show');
+}
+
+function statusBadge(status) {
+    const map = {
+        'new': ['新线索', 'badge-blue'],
+        'interested': ['有意向', 'badge-green'],
+        'considering': ['考虑中', 'badge-amber'],
+        'price_sensitive': ['价格敏感', 'badge-amber'],
+        'no_show': ['爽约未到', 'badge-red'],
+        'silent': ['静默失联', 'badge-gray'],
+        'contacted': ['已联系', 'badge-blue'],
+        'busy': ['时间冲突', 'badge-amber'],
+        'not_matching': ['需求不匹配', 'badge-pink'],
+        'enrolled': ['已报名', 'badge-green'],
+    };
+    const [label, cls] = map[status] || ['未知', 'badge-gray'];
+    return `<span class="badge ${cls}">${label}</span>`;
+}
+
+async function renderWorkflow(container) {
+    const [leads, statuses] = await Promise.all([
+        fetch('/api/leads').then(r => r.json()),
+        fetch('/api/statuses').then(r => r.json())
+    ]);
+
+    const groups = {};
+    statuses.forEach(s => {
+        if (s.id !== 'enrolled') groups[s.id] = { label: s.label, leads: [] };
+    });
+    leads.forEach(l => {
+        if (groups[l.跟进状态]) groups[l.跟进状态].leads.push(l);
+        else if (l.跟进状态 !== 'enrolled') {
+            groups[l.跟进状态] = { label: l.跟进状态, leads: [l] };
+        }
+    });
+
+    const order = ['new', 'contacted', 'interested', 'considering', 'price_sensitive', 'busy', 'no_show', 'not_matching', 'silent'];
+    const workflowHtml = order.map(statusId => {
+        const g = groups[statusId];
+        if (!g) return '';
+        return `
+            <div class="wf-column" ondrop="onDrop(event, '${statusId}')" ondragover="onDragOver(event)">
+                <div class="wf-column-header">
+                    <span>${g.label}</span>
+                    <span class="wf-count">${g.leads.length}</span>
+                </div>
+                <div class="wf-column-body">
+                    ${g.leads.map(l => `
+                        <div class="wf-card" draggable="true" ondragstart="onDragStart(event, ${l.id})" onclick="openLeadDetail(${l.id})">
+                            <div class="wf-card-name">${l.姓名}</div>
+                            <div class="wf-card-info">${l.咨询专业}</div>
+                            <div class="wf-card-score level-${l.等级}">${l.等级} ${l.总分}分</div>
+                        </div>
+                    `).join('')}
+                    ${g.leads.length === 0 ? '<div class="wf-empty">暂无线索</div>' : ''}
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    container.innerHTML = `
+        <div class="topbar">
+            <h2>🔄 跟进工作流</h2>
+            <span style="font-size:13px;color:var(--gray-500);">拖拽线索到对应状态列即可更新</span>
+        </div>
+        <div class="content">
+            <div class="wf-container">
+                ${workflowHtml}
+            </div>
+        </div>
+        <style>
+            .wf-container { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 12px; min-height: 60vh; }
+            .wf-column { min-width: 180px; max-width: 200px; flex: 1; background: var(--gray-100); border-radius: var(--radius); display: flex; flex-direction: column; }
+            .wf-column-header { padding: 10px 12px; font-size: 13px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--gray-200); }
+            .wf-count { background: var(--gray-300); color: var(--gray-700); border-radius: 12px; padding: 1px 8px; font-size: 11px; }
+            .wf-column-body { padding: 8px; flex: 1; min-height: 100px; }
+            .wf-card { background: white; border-radius: 6px; padding: 10px; margin-bottom: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.06); cursor: grab; transition: all 0.15s; }
+            .wf-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+            .wf-card-name { font-weight: 600; font-size: 13px; }
+            .wf-card-info { font-size: 11px; color: var(--gray-500); margin: 2px 0; }
+            .wf-card-score { font-size: 11px; }
+            .wf-empty { text-align: center; padding: 20px; color: var(--gray-400); font-size: 12px; }
+        </style>
+    `;
+}
+
+let _dragId = null;
+window.onDragStart = function(e, id) {
+    _dragId = id;
+    e.dataTransfer.effectAllowed = 'move';
+};
+window.onDragOver = function(e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+};
+window.onDrop = async function(e, newStatus) {
+    e.preventDefault();
+    if (_dragId === null) return;
+    // In a real app we'd POST to update the status
+    alert(`线索 #${_dragId} 已移至「${newStatus}」状态\n（实际系统中会自动保存更新）`);
+    _dragId = null;
+};
+
+async function renderAnalysis(container) {
+    const res = await fetch('/api/stats').then(r => r.json());
+    const { stats, course_dist, insights, suggestions } = res;
+
+    const courseEntries = Object.entries(course_dist).sort((a,b) => b[1] - a[1]);
+    const total = courseEntries.reduce((s, [,v]) => s + v, 0);
+
+    container.innerHTML = `
+        <div class="topbar">
+            <h2>📈 数据分析</h2>
+            <span class="topbar-time">招生数据概览</span>
+        </div>
+        <div class="content">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                <div class="suggestion-box" style="margin-bottom:0;">
+                    <h3>📌 关键指标</h3>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">
+                        <div><strong style="font-size:24px;">${stats.total_leads}</strong><br><span style="font-size:12px;color:var(--gray-500);">总线索</span></div>
+                        <div><strong style="font-size:24px;color:var(--success);">${stats.enrolled}</strong><br><span style="font-size:12px;color:var(--gray-500);">已报名</span></div>
+                        <div><strong style="font-size:24px;color:var(--danger);">${stats.silent}</strong><br><span style="font-size:12px;color:var(--gray-500);">静默失联</span></div>
+                        <div><strong style="font-size:24px;color:var(--warning);">${stats.no_show}</strong><br><span style="font-size:12px;color:var(--gray-500);">爽约未到</span></div>
+                    </div>
+                </div>
+                <div class="insight-card success">
+                    <div class="insight-title">整体转化率</div>
+                    <div class="insight-value">${(stats.total_leads > 0 ? (stats.enrolled/stats.total_leads*100).toFixed(1) : 0)}%</div>
+                    <div class="insight-detail">共${stats.total_leads}条线索 | 已报名${stats.enrolled}人</div>
+                </div>
+            </div>
+
+            <div style="margin-top:24px;">
+                <div class="section-title">📚 咨询课程分布</div>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>课程类别</th><th>咨询人数</th><th>占比</th></tr></thead>
+                        <tbody>
+                            ${courseEntries.map(([course, count]) => `
+                                <tr>
+                                    <td><strong>${course}</strong></td>
+                                    <td>${count}</td>
+                                    <td>${(count/total*100).toFixed(1)}%</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div style="margin-top:24px;">
+                <div class="section-title">🤖 智能体诊断建议</div>
+                ${suggestions.length > 0 ? suggestions.map(s => `
+                    <div class="suggestion-item" style="padding:8px 12px;background:var(--primary-bg);border-radius:6px;margin-bottom:6px;font-size:14px;">${s}</div>
+                `).join('') : '<div style="color:var(--gray-400);">暂无建议</div>'}
+            </div>
+        </div>
+    `;
+}
+
+// Modal for lead detail
+
+
+async function renderReport(container) {
+    const res = await fetch('/api/report').then(r => r.json());
+    const { a_list, b_list, silent_list, enrolled_list, total, generated_at } = res;
+    const lMap = { 'a':'A', 'b':'B', 'silent':'D', 'enrolled':'已报名' };
+
+    container.innerHTML = `
+        <div class="topbar">
+            <h2>📋 招生线索报告</h2>
+            <span class="topbar-time">${generated_at}</span>
+        </div>
+        <div class="content">
+            <div style="text-align:center;margin-bottom:16px;padding:12px 20px;background:#f0f9ff;border-radius:8px;border:1px solid #bae6fd;">
+                <p style="font-size:16px;font-weight:600;color:#0369a1;">总线索 ${total} 条 | 
+                <span style="color:#16a34a;">A级 ${a_list.length}</span> · 
+                <span style="color:#2563eb;">B级 ${b_list.length}</span> · 
+                <span style="color:#d97706;">待唤醒 ${silent_list.length}</span> · 
+                <span style="color:#9333ea;">已报名 ${enrolled_list.length}</span></p>
+            </div>
+
+            <div class="rp-section rp-red">
+                <div class="rp-header"><span class="rp-badge">1</span><span class="rp-title">今天就得联系</span><span class="rp-count">${a_list.length}人</span></div>
+                ${a_list.length > 0 ? a_list.map(l => renderLeadCard(l)).join('') : '<p style="padding:12px;color:var(--gray-400);">暂无A级线索</p>'}
+            </div>
+
+            <div class="rp-section rp-yellow">
+                <div class="rp-header"><span class="rp-badge">2</span><span class="rp-title">本周内跟进</span><span class="rp-count">${b_list.length}人</span></div>
+                ${b_list.length > 0 ? renderTable(b_list) : '<p style="padding:12px;color:var(--gray-400);">暂无B级线索</p>'}
+            </div>
+
+            <div class="rp-section rp-green">
+                <div class="rp-header"><span class="rp-badge">3</span><span class="rp-title">沉默客户待唤醒</span><span class="rp-count">${silent_list.length}人</span></div>
+                ${silent_list.length > 0 ? silent_list.map(l => renderLeadCard(l, true)).join('') : '<p style="padding:12px;color:var(--gray-400);">暂无沉默线索</p>'}
+            </div>
+
+            <div class="rp-section rp-purple">
+                <div class="rp-header"><span class="rp-badge">✅</span><span class="rp-title">已报名</span><span class="rp-count">${enrolled_list.length}人</span></div>
+                ${enrolled_list.length > 0 ? enrolled_list.map(l => `<div style="padding:8px 12px;border-bottom:1px solid #e5e7eb;font-size:14px;"><strong>${l.name}</strong> ${l.phone} &rarr; ${l.course}</div>`).join('') : '<p style="padding:12px;color:var(--gray-400);">暂无已报名线索</p>'}
+            </div>
+
+            <div style="margin-top:20px;text-align:center;">
+                <button onclick="window.print()" style="padding:8px 24px;background:var(--gray-900);color:white;border:none;border-radius:6px;cursor:pointer;font-size:14px;">🖨 打印/导出PDF</button>
+            </div>
+        </div>
+        <style>
+            .rp-section { background:white; border-radius:8px; box-shadow:0 1px 3px rgba(0,0,0,0.08); margin-bottom:12px; overflow:hidden; }
+            .rp-header { display:flex; align-items:center; gap:8px; padding:12px 16px; border-bottom:1px solid #e5e7eb; }
+            .rp-badge { width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:white; }
+            .rp-red .rp-badge { background:#dc2626; }
+            .rp-yellow .rp-badge { background:#d97706; }
+            .rp-green .rp-badge { background:#16a34a; }
+            .rp-purple .rp-badge { background:#9333ea; }
+            .rp-title { font-size:15px; font-weight:600; flex:1; }
+            .rp-count { font-size:13px; color:var(--gray-500); background:var(--gray-100); padding:2px 10px; border-radius:12px; }
+            .rp-lead-card { padding:10px 16px; border-bottom:1px solid #f3f4f6; cursor:pointer; }
+            .rp-lead-card:hover { background:#f9fafb; }
+            .rp-lead-card:last-child { border-bottom:none; }
+            .rp-ln { font-size:14px; font-weight:600; }
+            .rp-lp { font-size:12px; color:var(--gray-500); }
+            .rp-ls { font-size:12px; margin-top:4px; }
+            .rp-pain { display:inline-block; padding:1px 6px; border-radius:3px; background:#fef3c7; font-size:11px; margin:1px; }
+            .rp-record { font-size:12px; color:var(--gray-400); margin-top:2px; }
+            @media print { .sidebar,.topbar,button { display:none !important; } .content { padding:0 !important; } }
+        </style>
+    `;
+}
+
+function renderLeadCard(l, isSilent=false) {
+    const label = l.status === 'enrolled' ? '已报名' : 
+                  l.status === 'silent' ? '静默失联' :
+                  l.status === 'no_show' ? '爽约未到' :
+                  l.status;
+    const statusClass = l.status === 'silent' ? 'badge-gray' :
+                        l.status === 'no_show' ? 'badge-red' :
+                        l.status === 'enrolled' ? 'badge-green' : 'badge-blue';
+    return `
+        <div class="rp-lead-card" onclick="openLeadDetail(${l.id})">
+            <div class="rp-ln">${l.name} <span style="font-weight:400;color:var(--gray-400);font-size:13px;">${l.phone}</span></div>
+            <div class="rp-lp">咨询：${l.course} ${isSilent ? l.record ? ' | ' + l.record.slice(0,40) : '' : ''}</div>
+            <div class="rp-ls"><span class="badge ${statusClass}">${label}</span> 得分：${l.score} | ${(l.pains||[]).map(p => '<span class="rp-pain">' + p + '</span>').join('')}</div>
+        </div>
+    `;
+}
+
+function renderTable(list) {
+    return `
+        <table style="width:100%;border-collapse:collapse;font-size:13px;">
+            <thead><tr style="background:#f9fafb;"><th style="padding:8px 12px;text-align:left;border-bottom:1px solid #e5e7eb;">姓名</th><th style="padding:8px 12px;text-align:left;border-bottom:1px solid #e5e7eb;">电话</th><th style="padding:8px 12px;text-align:left;border-bottom:1px solid #e5e7eb;">咨询</th><th style="padding:8px 12px;text-align:left;border-bottom:1px solid #e5e7eb;">状态</th><th style="padding:8px 12px;text-align:left;border-bottom:1px solid #e5e7eb;">分数</th></tr></thead>
+            <tbody>
+                ${list.map(l => `
+                    <tr onclick="openLeadDetail(${l.id})" style="cursor:pointer;">
+                        <td style="padding:8px 12px;border-bottom:1px solid #f3f4f6;font-weight:600;">${l.name}</td>
+                        <td style="padding:8px 12px;border-bottom:1px solid #f3f4f6;color:var(--gray-500);">${l.phone}</td>
+                        <td style="padding:8px 12px;border-bottom:1px solid #f3f4f6;">${l.course}</td>
+                        <td style="padding:8px 12px;border-bottom:1px solid #f3f4f6;"><span class="badge badge-blue">${l.status === 'interested' ? '有意向' : l.status === 'considering' ? '考虑中' : l.status === 'price_sensitive' ? '价格敏感' : l.status === 'busy' ? '时间冲突' : l.status === 'contacted' ? '已联系' : l.status === 'silent' ? '静默' : l.status === 'no_show' ? '爽约' : l.status === 'new' ? '新线索' : l.status}</span></td>
+                        <td style="padding:8px 12px;border-bottom:1px solid #f3f4f6;">${l.score}</td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+    `;
+}
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    const modalHtml = '<div class="modal-overlay" id="detail-modal" onclick="if(event.target===this)closeModal()"><div class="modal"><div class="modal-header"><h3>📋 线索详情</h3><button class="modal-close" onclick="closeModal()">✕</button></div><div class="modal-body" id="detail-body"></div></div></div>';
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    loadPage();
+});
+
+window.addEventListener('popstate', loadPage);
+</script>
+</body>
+</html>

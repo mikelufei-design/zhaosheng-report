@@ -1,0 +1,16 @@
+﻿__pycache__/
+*.pyc
+.env
+server.log
+server.err
+server.out
+tunnel_*.txt
+public_url.txt
+repo_info.json
+gh_pages_url.txt
+docs/.git/
+*.bat
+make_report.py
+export_report.py
+fix_app.py
+test_api.py
